@@ -3,6 +3,7 @@ import Icon from '@/components/ui/Icon';
 import { cn, FOCUS, PRIMARY_BUTTON, SECONDARY_BUTTON } from '../../theme';
 import { monthStartKey, shiftMonth } from '../calendarUtils';
 import {
+  addDays,
   formatDate,
   formatTime,
   getToday,
@@ -11,6 +12,7 @@ import {
   latestDate,
 } from '../dateTime';
 import CalendarMonth from './CalendarMonth';
+import { getCalendarMode } from './calendarModes';
 import useCalendarDialog from './useCalendarDialog';
 import styles from './CalendarModal.module.css';
 
@@ -18,6 +20,7 @@ function CalendarContent({
   mode,
   value,
   pickupDate,
+  startDate,
   minDate,
   locationLabel,
   timeValue,
@@ -27,43 +30,45 @@ function CalendarContent({
   const id = useId();
   const { dialogRef, titleRef } = useCalendarDialog();
   const backdropPointerDown = useRef(false);
+  const settings = getCalendarMode(mode);
   const today = getToday();
 
+  // Existing CarsForm calls can continue passing pickupDate.
+  const start = isDateKey(startDate) ? startDate : pickupDate;
+  const rangeStartDate =
+    settings.rangeStartLabel && isDateKey(start) ? start : '';
   const minimumDate = latestDate(
     today,
     minDate,
-    mode === 'return' ? pickupDate : '',
+    rangeStartDate ? addDays(rangeStartDate, settings.minimumDays || 0) : '',
   );
-
   const initialDate =
     isDateKey(value) && value >= minimumDate ? value : minimumDate;
 
   const [draftDate, setDraftDate] = useState(initialDate);
   const [visibleMonth, setVisibleMonth] = useState(monthStartKey(initialDate));
 
-  const isReturn = mode === 'return';
-  const title = isReturn ? 'Return date' : 'Pickup date';
-  const canGoPrev = visibleMonth > monthStartKey(minimumDate);
+  // Allow viewing the start date even when check-out is in the next month.
+  const firstVisibleDate =
+    rangeStartDate && rangeStartDate < minimumDate
+      ? rangeStartDate
+      : minimumDate;
+  const canGoPrev = visibleMonth > monthStartKey(firstVisibleDate);
   const canConfirm = isDateKey(draftDate) && draftDate >= minimumDate;
-
   const cleanLocation =
     typeof locationLabel === 'string' ? locationLabel.trim() : '';
-
   const caption =
     cleanLocation && cleanLocation !== '—'
-      ? `${cleanLocation} · Hawaii time (HST)`
-      : 'Hawaii time (HST)';
-
+      ? `${cleanLocation} · ${settings.context}`
+      : settings.context;
   const summary = [
     formatDate(draftDate),
-    isTime(timeValue) ? `${formatTime(timeValue)} HST` : '',
+    settings.showTime && isTime(timeValue)
+      ? `${formatTime(timeValue)} HST`
+      : '',
   ]
     .filter(Boolean)
     .join(' · ');
-
-  const helperText = isReturn
-    ? 'The highlighted dates show your rental. Choose the time using the dropdown on the page. Your date is applied only after confirmation.'
-    : 'Choose the time using the dropdown on the page. Your date is applied only after confirmation.';
 
   const navigationClass = cn(
     'pointer-events-auto grid size-11 place-items-center rounded-full',
@@ -72,19 +77,18 @@ function CalendarContent({
     'disabled:opacity-30',
     FOCUS,
   );
-
   const monthProps = {
     minDate: minimumDate,
     today,
     draftDate,
-    pickupDate,
-    mode,
+    rangeStartDate,
+    rangeStartLabel: settings.rangeStartLabel,
+    selectedLabel: settings.selectedLabel,
     onSelect: setDraftDate,
   };
 
   function isBackdrop(event) {
     if (event.target !== event.currentTarget) return false;
-
     const bounds = event.currentTarget.getBoundingClientRect();
 
     return (
@@ -123,10 +127,7 @@ function CalendarContent({
         backdropPointerDown.current = false;
       }}
       onClick={(event) => {
-        if (backdropPointerDown.current && isBackdrop(event)) {
-          onClose();
-        }
-
+        if (backdropPointerDown.current && isBackdrop(event)) onClose();
         backdropPointerDown.current = false;
       }}
       className={cn(
@@ -141,9 +142,8 @@ function CalendarContent({
           tabIndex={-1}
           className="text-base font-semibold text-ink outline-none"
         >
-          {title}
+          {settings.title}
         </h2>
-
         <button
           type="button"
           onClick={onClose}
@@ -170,15 +170,12 @@ function CalendarContent({
               disabled={!canGoPrev}
               aria-label="Previous month"
               onClick={() => {
-                if (canGoPrev) {
-                  setVisibleMonth(shiftMonth(visibleMonth, -1));
-                }
+                if (canGoPrev) setVisibleMonth(shiftMonth(visibleMonth, -1));
               }}
               className={navigationClass}
             >
               <Icon name="chevron-left" className="size-4" />
             </button>
-
             <button
               type="button"
               aria-label="Next month"
@@ -191,7 +188,6 @@ function CalendarContent({
 
           <div className="grid items-start gap-7 md:grid-cols-2">
             <CalendarMonth {...monthProps} monthKey={visibleMonth} />
-
             <div className="hidden min-w-0 md:block">
               <CalendarMonth
                 {...monthProps}
@@ -202,7 +198,7 @@ function CalendarContent({
         </div>
 
         <p id={`${id}-help`} className="mt-5 text-xs leading-6 text-muted">
-          {helperText}
+          {settings.helperText}
         </p>
       </div>
 
@@ -215,7 +211,6 @@ function CalendarContent({
           >
             {summary}
           </p>
-
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -224,7 +219,6 @@ function CalendarContent({
             >
               Cancel
             </button>
-
             <button
               type="button"
               disabled={!canConfirm}
@@ -234,7 +228,7 @@ function CalendarContent({
                 'min-w-0 flex-1 px-4 sm:flex-none sm:px-6',
               )}
             >
-              {isReturn ? 'Confirm return date' : 'Confirm pickup date'}
+              {settings.confirmLabel}
             </button>
           </div>
         </div>
@@ -245,6 +239,5 @@ function CalendarContent({
 
 export default function CalendarModal({ open, ...props }) {
   if (!open) return null;
-
   return <CalendarContent key={props.mode} {...props} />;
 }

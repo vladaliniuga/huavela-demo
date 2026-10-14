@@ -14,8 +14,9 @@ export default function CalendarMonth({
   minDate,
   today,
   draftDate,
-  pickupDate,
-  mode,
+  rangeStartDate = '',
+  rangeStartLabel = '',
+  selectedLabel = 'Selected',
   onSelect,
 }) {
   const headingId = useId();
@@ -23,7 +24,7 @@ export default function CalendarMonth({
   const cells = useMemo(() => {
     const days = buildMonthCells(monthKey);
 
-    // Always render six complete rows, including blank cells.
+    // Keep the fixed six-row layout from the iPhone calendar fix.
     return [...days, ...Array(Math.max(0, 42 - days.length)).fill(null)];
   }, [monthKey]);
 
@@ -67,23 +68,22 @@ export default function CalendarMonth({
           const date = cell.dateKey;
           const disabled = date < minDate;
           const selected = date === draftDate;
-          const isPickup = mode === 'pickup' ? selected : date === pickupDate;
-          const isReturn = mode === 'return' && selected;
-          const endpoint = isPickup || isReturn;
-          const inRange =
-            mode === 'return' && isInRange(date, pickupDate, draftDate);
+          const isRangeStart =
+            Boolean(rangeStartDate) && date === rangeStartDate;
+          const endpoint = selected || isRangeStart;
+          const inRange = isInRange(date, rangeStartDate, draftDate);
           const marker =
-            isPickup && isReturn
+            isRangeStart && selected
               ? 'Both'
-              : isPickup
-                ? 'Pickup'
-                : isReturn
-                  ? 'Return'
+              : isRangeStart
+                ? rangeStartLabel
+                : selected
+                  ? selectedLabel
                   : '';
           const accessibleLabel = [
             formatDate(date),
-            isPickup && 'Pickup',
-            isReturn && 'Return',
+            isRangeStart && rangeStartLabel,
+            selected && selectedLabel,
             disabled && 'Unavailable',
           ]
             .filter(Boolean)
@@ -115,7 +115,6 @@ export default function CalendarMonth({
               )}
             >
               <span className="block leading-5">{cell.day}</span>
-
               {marker && (
                 <span className="block text-[8px] font-semibold leading-3 sm:text-[9px]">
                   {marker}
