@@ -15,10 +15,11 @@ export default function CalendarMonth({
   draftDate,
   pickupDate,
   mode,
+  startLabel = 'Pickup',
+  endLabel = 'Return',
   onSelect,
 }) {
   const headingId = useId();
-
   const cells = useMemo(() => {
     const days = buildMonthCells(monthKey);
 
@@ -60,28 +61,24 @@ export default function CalendarMonth({
           const date = cell.dateKey;
           const disabled = date < minDate;
           const selected = date === draftDate;
-
           const isPickup = mode === 'pickup' ? selected : date === pickupDate;
-
           const isReturn = mode === 'return' && selected;
           const endpoint = isPickup || isReturn;
-
           const inRange =
             mode === 'return' && isInRange(date, pickupDate, draftDate);
-
           const marker =
             isPickup && isReturn
               ? 'Both'
               : isPickup
-                ? 'Pickup'
+                ? startLabel
                 : isReturn
-                  ? 'Return'
+                  ? endLabel
                   : '';
 
           const accessibleLabel = [
             formatDate(date),
-            isPickup && 'Pickup',
-            isReturn && 'Return',
+            isPickup && startLabel,
+            isReturn && endLabel,
             disabled && 'Unavailable',
           ]
             .filter(Boolean)
@@ -97,8 +94,7 @@ export default function CalendarMonth({
               aria-pressed={selected}
               aria-current={date === today ? 'date' : undefined}
               className={cn(
-                'flex h-11 w-full min-w-0 flex-col items-center justify-center',
-                'rounded-xl border border-transparent text-sm transition sm:h-12',
+                'flex h-11 w-full min-w-0 flex-col items-center justify-center rounded-xl border border-transparent text-sm transition sm:h-12',
                 endpoint
                   ? 'bg-ink font-semibold text-white'
                   : disabled
@@ -114,9 +110,8 @@ export default function CalendarMonth({
               )}
             >
               <span className="leading-5">{cell.day}</span>
-
               {marker && (
-                <span className="text-[8px] font-semibold leading-3 sm:text-[9px]">
+                <span className="max-w-full truncate px-0.5 text-[8px] font-semibold leading-3 sm:text-[9px]">
                   {marker}
                 </span>
               )}
