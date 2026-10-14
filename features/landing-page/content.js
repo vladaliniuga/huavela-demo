@@ -24,7 +24,7 @@ export const CATEGORIES = [
     accent: 'More island.',
     subtitle:
       'From your first coastal drive to your next unplanned stop, find a car that fits the way you want to explore.',
-    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d',
+    image: '/cars.png',
     imagePosition: 'center',
     fallback: 'linear-gradient(135deg, #d8eae8, #699a9c)',
     cta: 'Find your drive',
