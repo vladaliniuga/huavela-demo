@@ -1,0 +1,113 @@
+.dialog {
+  --calendar-viewport: 100vh;
+  --calendar-space: calc(
+    var(--calendar-viewport) - 24px - env(safe-area-inset-top, 0px) -
+      env(safe-area-inset-bottom, 0px)
+  );
+
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: calc(100% - 24px);
+  max-width: 960px;
+  height: min(720px, var(--calendar-space));
+  max-height: var(--calendar-space);
+  min-height: 0;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Do not depend on an auto-height flex container for the calendar body. */
+.dialog[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.dialog:not([open]) {
+  display: none;
+}
+
+.dialog::backdrop {
+  background: rgba(20, 57, 79, 0.5);
+}
+
+.scrollBody {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+}
+
+.days {
+  grid-template-rows: repeat(6, 44px);
+}
+
+.day,
+.emptyDay {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+}
+
+.day {
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-text-fill-color: currentColor;
+  opacity: 1;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  color: var(--ui-ink, #14394f);
+  background-color: transparent;
+}
+
+.day[data-in-range='true'] {
+  background-color: var(--ui-mist, #e8f4fa);
+}
+
+.day:disabled {
+  color: #8b9da7;
+}
+
+.day[data-endpoint='true'] {
+  color: #ffffff;
+  background-color: var(--ui-ink, #14394f);
+}
+
+@supports (height: 100dvh) {
+  .dialog {
+    --calendar-viewport: 100dvh;
+  }
+}
+
+@media (min-width: 640px) {
+  .days {
+    grid-template-rows: repeat(6, 48px);
+  }
+
+  .day,
+  .emptyDay {
+    height: 48px;
+    min-height: 48px;
+  }
+}
+
+@media (hover: hover) {
+  .day:not(:disabled):not([data-endpoint='true']):hover {
+    background-color: var(--ui-mist, #e8f4fa);
+  }
+}

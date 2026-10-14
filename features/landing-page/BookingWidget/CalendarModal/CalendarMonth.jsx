@@ -7,6 +7,7 @@ import {
   WEEKDAY_LABELS,
 } from '../calendarUtils';
 import { formatDate } from '../dateTime';
+import styles from './CalendarModal.module.css';
 
 export default function CalendarMonth({
   monthKey,
@@ -15,15 +16,14 @@ export default function CalendarMonth({
   draftDate,
   pickupDate,
   mode,
-  startLabel = 'Pickup',
-  endLabel = 'Return',
   onSelect,
 }) {
   const headingId = useId();
+
   const cells = useMemo(() => {
     const days = buildMonthCells(monthKey);
 
-    // Keep both months aligned and avoid height jumps while navigating.
+    // Always render six complete rows, including blank cells.
     return [...days, ...Array(Math.max(0, 42 - days.length)).fill(null)];
   }, [monthKey]);
 
@@ -38,7 +38,13 @@ export default function CalendarMonth({
         {monthLabel(monthKey)}
       </h3>
 
-      <div className="mb-2 grid grid-cols-7 text-center text-[11px] font-medium text-muted">
+      <div
+        aria-hidden="true"
+        className={cn(
+          styles.weekdays,
+          'mb-2 text-center text-[11px] font-medium text-muted',
+        )}
+      >
         {WEEKDAY_LABELS.map((weekday) => (
           <span key={weekday} className="py-2">
             {weekday}
@@ -46,14 +52,14 @@ export default function CalendarMonth({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className={styles.days}>
         {cells.map((cell, index) => {
           if (!cell) {
             return (
               <span
                 key={`empty-${index}`}
                 aria-hidden="true"
-                className="h-11 sm:h-12"
+                className={styles.emptyDay}
               />
             );
           }
@@ -70,15 +76,14 @@ export default function CalendarMonth({
             isPickup && isReturn
               ? 'Both'
               : isPickup
-                ? startLabel
+                ? 'Pickup'
                 : isReturn
-                  ? endLabel
+                  ? 'Return'
                   : '';
-
           const accessibleLabel = [
             formatDate(date),
-            isPickup && startLabel,
-            isReturn && endLabel,
+            isPickup && 'Pickup',
+            isReturn && 'Return',
             disabled && 'Unavailable',
           ]
             .filter(Boolean)
@@ -89,19 +94,19 @@ export default function CalendarMonth({
               key={date}
               type="button"
               disabled={disabled}
+              data-calendar-date={date}
+              data-endpoint={endpoint ? 'true' : undefined}
+              data-in-range={inRange ? 'true' : undefined}
               onClick={() => onSelect(date)}
               aria-label={accessibleLabel}
               aria-pressed={selected}
               aria-current={date === today ? 'date' : undefined}
               className={cn(
-                'flex h-11 w-full min-w-0 flex-col items-center justify-center rounded-xl border border-transparent text-sm transition sm:h-12',
-                endpoint
-                  ? 'bg-ink font-semibold text-white'
-                  : disabled
-                    ? 'text-ink/25'
-                    : inRange
-                      ? 'bg-mist font-medium text-ink hover:bg-ocean/20'
-                      : 'text-ink hover:border-ocean/30 hover:bg-mist',
+                styles.day,
+                'flex flex-col items-center justify-center rounded-xl',
+                'border border-transparent text-sm transition',
+                endpoint ? 'font-semibold' : 'font-medium',
+                'disabled:cursor-not-allowed',
                 date === today &&
                   !endpoint &&
                   !disabled &&
@@ -109,9 +114,10 @@ export default function CalendarMonth({
                 FOCUS,
               )}
             >
-              <span className="leading-5">{cell.day}</span>
+              <span className="block leading-5">{cell.day}</span>
+
               {marker && (
-                <span className="max-w-full truncate px-0.5 text-[8px] font-semibold leading-3 sm:text-[9px]">
+                <span className="block text-[8px] font-semibold leading-3 sm:text-[9px]">
                   {marker}
                 </span>
               )}
