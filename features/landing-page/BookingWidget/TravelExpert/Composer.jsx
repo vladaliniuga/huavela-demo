@@ -72,7 +72,7 @@ export default function Composer({
           maxLength={MAX_MESSAGE_LENGTH}
           onChange={(event) => onDraftChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask me anything…"
+          placeholder="Let's start planning…"
           aria-describedby={`${id}-help`}
           className={cn(
             'min-h-12 min-w-0 flex-1 resize-none',
