@@ -1,26 +1,141 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@source "../components";
+@source "../features";
+@source "../pages";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  --ui-ink: #14394f;
+  --ui-ocean: #3999c6;
+  --ui-mist: #e8f4fa;
+  --ui-soft: #f5fafc;
+  --ui-surface: #ffffff;
+  --ui-muted: #506d7b;
+  --ui-line: #cfdee6;
+  --ui-danger: #a52e40;
+
+  --background: var(--ui-mist);
+  --foreground: var(--ui-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-ink: var(--ui-ink);
+  --color-ocean: var(--ui-ocean);
+  --color-mist: var(--ui-mist);
+  --color-soft: var(--ui-soft);
+  --color-surface: var(--ui-surface);
+  --color-muted: var(--ui-muted);
+  --color-line: var(--ui-line);
+  --color-danger: var(--ui-danger);
+
+  --font-sans: var(--font-huavela-sans, Arial, Helvetica, sans-serif);
+  --font-display: var(
+    --font-huavela-display,
+    Georgia,
+    'Times New Roman',
+    serif
+  );
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-widget: 0 20px 70px -25px rgb(20 57 79 / 28%);
+  --animate-reveal: huavela-reveal 350ms ease-out both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+    background: var(--background);
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-huavela-sans, Arial, Helvetica, sans-serif);
+  }
+
+  #__next {
+    min-height: 100vh;
+  }
+
+  button:not(:disabled),
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background: #bee6f6;
+    color: var(--ui-ink);
+  }
+
+  input[type='date'] {
+    color-scheme: light;
+  }
+
+  input[type='date']::-webkit-date-and-time-value {
+    text-align: left;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.huavela-hero-wash {
+  background: linear-gradient(
+    90deg,
+    rgb(232 244 250 / 99%) 0%,
+    rgb(232 244 250 / 94%) 34%,
+    rgb(232 244 250 / 72%) 56%,
+    rgb(232 244 250 / 12%) 100%
+  );
+}
+
+.huavela-tabs {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line) transparent;
+}
+
+@keyframes huavela-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .huavela-hero-wash {
+    background: linear-gradient(
+      180deg,
+      rgb(232 244 250 / 50%) 0%,
+      rgb(232 244 250 / 92%) 48%,
+      #e8f4fa 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
