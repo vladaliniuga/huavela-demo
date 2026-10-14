@@ -44,10 +44,18 @@ const PATHS = {
       <path d="m16 16 5 5" />
     </>
   ),
+  calendar: (
+    <>
+      <path d="M7 3v3M17 3v3M4 9h16" />
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+    </>
+  ),
   'arrow-right': <path d="M4 12h16m-6-6 6 6-6 6" />,
   'arrow-up': <path d="M12 20V4m-6 6 6-6 6 6" />,
   'arrow-up-right': <path d="M5 19 19 5M5 5h14v14" />,
   'chevron-down': <path d="m6 9 6 6 6-6" />,
+  'chevron-left': <path d="m15 18-6-6 6-6" />,
+  'chevron-right': <path d="m9 18 6-6-6-6" />,
   swap: <path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   close: <path d="m6 6 12 12M6 18 18 6" />,

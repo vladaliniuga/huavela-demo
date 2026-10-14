@@ -115,6 +115,43 @@ export function DateField({
   );
 }
 
+export function ButtonField({
+  label,
+  value,
+  placeholder,
+  icon,
+  error,
+  className,
+  onClick,
+  disabled = false,
+}) {
+  const id = useId();
+
+  return (
+    <Field id={id} label={label} error={error} className={className}>
+      <button
+        id={id}
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={cn(
+          CONTROL,
+          'flex items-center justify-between px-3 text-left',
+          error ? 'border-danger' : 'border-line hover:border-ink/30',
+        )}
+      >
+        <span className="truncate">{value || placeholder}</span>
+
+        {icon ? (
+          <Icon name={icon} className="ml-3 size-4 shrink-0 text-ocean" />
+        ) : null}
+      </button>
+    </Field>
+  );
+}
+
 export function CheckboxField({ label, ...props }) {
   const id = useId();
 
